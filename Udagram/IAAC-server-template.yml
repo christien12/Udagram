@@ -57,16 +57,15 @@ Resources:
     Properties:
       UserData:
         Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          sudo apt update -y
-          sudo apt install -y apache2
-          sudo apt-get install zip -y
-          sudo systemctl start apache2
-          sudo systemctl enable apache2
-          sudo rm /var/www/html/index.html
-          sudo wget -P /var/www/html https://udagrambucket1.s3-us-west-2.amazonaws.com/udacity.zip
-          sudo unzip /var/www/html/udacity.zip -d /var/www/html/
-          sudo rm udacity.zip
+          #!/bin/bash
+          apt-get update -y
+          apt-get install unzip awscli -y
+          apt-get install apache2 -y
+          systemctl start apache2.service
+          cd /var/www/html
+          sudo aws s3 cp s3://udacity-demo-1/udacity.zip .
+          sudo unzip -o udacity.zip
+          systemctl restart apache2.service
 
       ImageId: ami-003634241a8fcdec0
       KeyName: JumpBox-Key
@@ -127,11 +126,11 @@ Resources:
     Properties:
       VPCZoneIdentifier:
         - Fn::ImportValue: 
-            !Sub "${EnvironmentName}-PUB1-SN"
+            !Sub "${EnvironmentName}-PUB-NETS"
       LaunchConfigurationName:
         Ref: WebAppLaunchConfig
-      MinSize: "1"
-      MaxSize: "1"
+      MinSize: '2'
+      MaxSize: '2'
       TargetGroupARNs:
       - Ref: WebAppTargetGroup
 
